@@ -20,7 +20,7 @@ struct City {
 vector<City> readCities(const string& path) {
     ifstream in(path);
     if (!in) {
-        cout << "Couldn't be opened " << path << "\n";
+        cout << "Could not open " << path << "\n";
         exit(1);
     }
     string line;
@@ -69,38 +69,91 @@ struct Edge {
     int u, v;
 };
 
-// Union-Find (DSU, Disjoint Set Union): dice si dos ciudades ya están
-// en el mismo "pedazo" de camino, para no cerrar un ciclo antes de tiempo.
 vector<int> parent;
 
 int findRoot(int x) {
-    // TODO: sube por parent[] hasta encontrar la raíz (la que es su propio padre).
+    while (parent[x] != x){
+        x = parent[x];
+    }
     return x;
 }
 
 void unite(int a, int b) {
-    // TODO: haz que la raíz de a apunte a la raíz de b.
+    int root_a = findRoot(a);
+    int root_b = findRoot(b);
+
+    parent[root_a] = root_b;
 }
 
 vector<int> solveCL(const vector<vector<long long>>& D) {
     int n = D.size();
+    if (n == 1) return {0};
     vector<int> tour;
 
     parent.assign(n, 0);
-    for (int i = 0; i < n; i++) parent[i] = i;   // al inicio cada ciudad es su propio pedazo
+    for (int i = 0; i < n; i++) parent[i] = i;
 
-    vector<int> degree(n, 0);                    // cuántas conexiones tiene cada ciudad
-    vector<vector<int>> adj(n);                  // vecinos de cada ciudad en el recorrido
+    vector<int> degree(n, 0);
+    vector<vector<int>> adj(n);                  
 
-    // TODO:
-    // 1. Crea todas las aristas (i, j) con i < j y peso D[i][j]; ordénalas de menor a mayor.
-    // 2. Recorre las aristas y acepta (u, v) solo si:
-    //      degree[u] < 2, degree[v] < 2 y findRoot(u) != findRoot(v).
-    //    Al aceptar: agrega a adj, sube degree y llama unite(u, v).
-    //    Detente al tener n-1 aristas aceptadas.
-    // 3. Las 2 ciudades con degree 1 son los extremos: conéctalas en adj para cerrar el ciclo.
-    // 4. Arma el tour: empieza en 0 y ve siempre al vecino del que NO vienes, hasta tener n ciudades.
-    // Caso especial: si n == 1, el tour es {0}.
+    vector<Edge> edges;
+    edges.reserve(n * (n - 1) / 2); 
+
+    for (int i = 0; i < n; i++){
+        for (int j = i + 1; j < n; j++){
+            edges.push_back( { D[i][j], i, j } );
+        }
+    }
+
+    sort(edges.begin(), edges.end(), [](const Edge& a, const Edge& b) {
+        return a.w < b.w;
+    });
+
+    int accepted = 0;
+
+    for (const Edge& e : edges){
+        int u = e.u;
+        int v = e.v;
+
+        if (degree[u] < 2 && degree[v] < 2 && findRoot(u) != findRoot(v)){
+            adj[u].push_back(v);
+            adj[v].push_back(u);
+            degree[u]++;
+            degree[v]++;
+            unite(u, v);
+            accepted++;
+
+            if (accepted == n-1) break;
+        }
+    }
+
+    vector<int> ends;
+    
+    for (int i = 0; i < n; i++){
+        if (degree[i] == 1){
+            ends.push_back(i);
+        }
+    }
+
+    int a = ends[0];
+    int b = ends[1];
+
+    adj[b].push_back(a);
+    adj[a].push_back(b);
+
+    int cur = 0;
+    int prev = -1;
+    int next;
+
+    while (tour.size() < n){
+        tour.push_back(cur);
+        next = adj[cur][0];
+
+        if (next == prev) next = adj[cur][1];
+
+        prev = cur;
+        cur = next;
+    }
 
     return tour;
 }
@@ -128,7 +181,7 @@ int main(int argc, char** argv) {
             vector<int> tour = solveCL(D);
 
             if ((int)tour.size() != n) {
-                cout << "Invalid tour at N =" << n << "\n";
+                cout << "Invalid tour at N = " << n << "\n";
                 return 1;
             }
             costs.push_back(tourCost(tour, D));
