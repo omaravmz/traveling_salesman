@@ -22,7 +22,7 @@ struct City {
 vector<City> readCities(const string& path) {
     ifstream in(path);
     if (!in) {
-        cout << "Couldn't be opened " << path << "\n";
+        cout << "Could not open " << path << "\n";
         exit(1);
     }
     string line;
@@ -139,7 +139,7 @@ int main(int argc, char** argv) {
     const long long OPTIMAL = 18659688;
 
     cout << "MST-TSP  (" << cities.size() << " READ CITIES, SEEDS 1, 2, 3)\n";
-    cout << "N\tAverage\tDesv.Est.\n";
+    cout << "N\tMean\tStd.Dev.\n";
 
     for (int n : sizes) {
         vector<long long> costs;
@@ -150,7 +150,7 @@ int main(int argc, char** argv) {
             vector<int> tour = solveMST(D);
 
             if ((int)tour.size() != n) {
-                cout << "Invalid tour at N =" << n << "\n";
+                cout << "Invalid tour at N = " << n << "\n";
                 return 1;
             }
             costs.push_back(tourCost(tour, D));
@@ -167,7 +167,7 @@ int main(int argc, char** argv) {
         cout << fixed;
         cout.precision(1);
         cout << n << "\t" << mean << "\t" << sd;
-        if (n == 1000) cout << "\t(" << (mean - OPTIMAL) * 100.0 / OPTIMAL << "% arriba del optimo)";
+        if (n == 1000) cout << "\t(" << (mean - OPTIMAL) * 100.0 / OPTIMAL << "% above optimal)";
         cout << "\n";
     }
     return 0;

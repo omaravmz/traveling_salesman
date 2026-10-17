@@ -170,7 +170,7 @@ int main(int argc, char** argv) {
     const long long OPTIMAL = 18659688;
 
     cout << "Cheapest-link-TSP  (" << cities.size() << " READ CITIES, SEEDS 1, 2, 3)\n";
-    cout << "N\tPromedio\tDesv.Est.\n";
+    cout << "N\tMean\tStd.Dev.\n";
 
     for (int n : sizes) {
         vector<long long> costs;
@@ -198,7 +198,7 @@ int main(int argc, char** argv) {
         cout << fixed;
         cout.precision(1);
         cout << n << "\t" << mean << "\t" << sd;
-        if (n == 1000) cout << "\t(" << (mean - OPTIMAL) * 100.0 / OPTIMAL << "% arriba del optimo)";
+        if (n == 1000) cout << "\t(" << (mean - OPTIMAL) * 100.0 / OPTIMAL << "% above optimal)";
         cout << "\n";
     }
     return 0;
