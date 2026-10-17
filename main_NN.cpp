@@ -78,22 +78,22 @@ vector<int> solveNN(const vector<vector<long long>>& D) {
     tour.reserve(n);
     vector<bool> visited(n, false);
 
-    int cur = 0;  
-    visited[cur] = true;
-    tour.push_back(cur);
+    int current = 0;  
+    visited[current] = true;
+    tour.push_back(current);
 
     for (int step = 1; step < n; step++) {
         int best = -1;
         long long bestD = LLONG_MAX;
         for (int j = 0; j < n; j++) {
-            if (!visited[j] && D[cur][j] < bestD) {
-                bestD = D[cur][j];
+            if (!visited[j] && D[current][j] < bestD) {
+                bestD = D[current][j];
                 best = j;
             }
         }
         visited[best] = true;
         tour.push_back(best);
-        cur = best;
+        current = best;
     }
     return tour;
 }
@@ -109,7 +109,7 @@ int main(int argc, char** argv) {
     const long long OPTIMAL = 18659688;
 
     cout << "NN-TSP  (" << cities.size() << " READ CITIES, SEEDS 1, 2, 3)\n";
-    cout << "N\tPromedio\tDesv.Est.\n";
+    cout << "N\tAverage\tDesv.Est.\n";
 
     for (int n : sizes) {
         vector<long long> costs;
