@@ -9,6 +9,7 @@
 #include <cmath>
 #include <random>
 #include <algorithm>
+#include <climits>
 using namespace std;
 
 // ---------- Helper functions and structures ----------
@@ -64,18 +65,36 @@ long long tourCost(const vector<int>& tour, const vector<vector<long long>>& D) 
 
 // ---------- Algorithm ----------
 
+/*
+    Time complexity: O(n^2) where n is the number of cities.
+    This is due to the nested loops n steps and n cities verified each time.
+
+    Space complexity: O(n) for the tour and visited arrays.
+
+*/
 vector<int> solveNN(const vector<vector<long long>>& D) {
     int n = D.size();
     vector<int> tour;
+    tour.reserve(n);
     vector<bool> visited(n, false);
 
-    // TODO (puedes reutilizar tu código del quiz):
-    // 1. Empieza en la ciudad 0: márcala visitada y agrégala al tour.
-    // 2. Mientras el tour tenga menos de n ciudades:
-    //      busca entre las NO visitadas la de menor D[actual][j],
-    //      márcala, agrégala y muévete a ella.
-    // 3. Regresa el tour (sin repetir la ciudad 0 al final; tourCost ya suma el regreso).
+    int cur = 0;  
+    visited[cur] = true;
+    tour.push_back(cur);
 
+    for (int step = 1; step < n; step++) {
+        int best = -1;
+        long long bestD = LLONG_MAX;
+        for (int j = 0; j < n; j++) {
+            if (!visited[j] && D[cur][j] < bestD) {
+                bestD = D[cur][j];
+                best = j;
+            }
+        }
+        visited[best] = true;
+        tour.push_back(best);
+        cur = best;
+    }
     return tour;
 }
 
@@ -101,7 +120,7 @@ int main(int argc, char** argv) {
             vector<int> tour = solveNN(D);
 
             if ((int)tour.size() != n) {
-                cout << "Invalid tour at N =" << n << "\n";
+                cout << "Invalid tour at N = " << n << "\n";
                 return 1;
             }
             costs.push_back(tourCost(tour, D));
