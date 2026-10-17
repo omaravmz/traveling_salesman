@@ -65,33 +65,65 @@ long long tourCost(const vector<int>& tour, const vector<vector<long long>>& D) 
 }
 
 // ---------- Algorithm ----------
+/*
+    Time complexity: O(n^2) where n is the number of cities.
+    This is due to the n iterations, each one scanning the n cities twice
+    (once to pick the closest one outside the tree and once to update the keys).
 
-// Prim: construye el árbol de expansión mínima (MST, Minimum Spanning Tree).
-// Regresa parent[v] = ciudad a la que v quedó conectada (la raíz tiene -1).
+    Space complexity: O(n) for the parent, key and inTree arrays.
+
+*/
 vector<int> primMST(const vector<vector<long long>>& D) {
     int n = D.size();
     vector<int> parent(n, -1);
-    vector<long long> key(n, LLONG_MAX);   // costo más barato para conectar cada ciudad al árbol
+    vector<long long> key(n, LLONG_MAX);
     vector<bool> inTree(n, false);
     key[0] = 0;
 
-    // TODO: repite n veces:
-    //   - toma la ciudad v fuera del árbol con menor key[v] y métela (inTree[v] = true);
-    //   - para cada u fuera del árbol: si D[v][u] < key[u] → key[u] = D[v][u] y parent[u] = v.
+    for (int it = 0; it < n; it++) {
+        int v = -1;
+        for (int u = 0; u < n; u++)
+            if (!inTree[u] && (v == -1 || key[u] < key[v])) v = u;
+        inTree[v] = true;
+
+        for (int u = 0; u < n; u++) {
+            if (!inTree[u] && D[v][u] < key[u]) {
+                key[u] = D[v][u];
+                parent[u] = v;
+            }
+        }
+    }
 
     return parent;
 }
 
+/*
+    Time complexity: O(n^2) where n is the number of cities.
+    Prim takes O(n^2); building the children lists and the preorder traversal
+    visit each city and each tree edge once, which is O(n).
+
+    Space complexity: O(n) for the parent, children, stack and tour arrays
+    (the tree has n - 1 edges).
+
+*/
 vector<int> solveMST(const vector<vector<long long>>& D) {
     int n = D.size();
     vector<int> tour;
+    tour.reserve(n);
 
-    // TODO:
-    // 1. parent = primMST(D).
-    // 2. Arma children[p]: para cada v con parent[v] != -1, agrega v a children[parent[v]].
-    // 3. Recorre el árbol en preorden (DFS, Depth-First Search) desde la ciudad 0 usando un stack:
-    //      saca una ciudad, agrégala al tour, mete sus hijos al stack.
-    //    El orden en que salen las ciudades ya es el recorrido.
+    vector<int> parent = primMST(D);
+    vector<vector<int>> children(n);
+    for (int v = 0; v < n; v++)
+        if (parent[v] != -1) children[parent[v]].push_back(v);
+
+    stack<int> st;
+    st.push(0);
+    while (!st.empty()) {
+        int v = st.top();
+        st.pop();
+        tour.push_back(v);
+        for (int c : children[v]) st.push(c);
+    }
 
     return tour;
 }
@@ -107,7 +139,7 @@ int main(int argc, char** argv) {
     const long long OPTIMAL = 18659688;
 
     cout << "MST-TSP  (" << cities.size() << " READ CITIES, SEEDS 1, 2, 3)\n";
-    cout << "N\tPromedio\tDesv.Est.\n";
+    cout << "N\tAverage\tDesv.Est.\n";
 
     for (int n : sizes) {
         vector<long long> costs;
